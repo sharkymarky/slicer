@@ -12,8 +12,8 @@ except Exception:  # pragma: no cover
 
 
 class KaleidoScopePipeline:
-    id = "kaleido_scope_slicer"
-    name = "Kaleido Scope Slicer"
+    id = "kaleido_scope"
+    name = "Kaleido Scope"
     description = "Kaleidoscope effect with prompt-length driven slice count"
     usage = [getattr(UsageType, "PIPELINE", getattr(UsageType, "MAIN", "pipeline"))]
     params_schema = KaleidoScopeParams

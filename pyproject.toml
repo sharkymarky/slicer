@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.entry-points."scope"]
-kaleido_scope_slicer = "kaleido_scope:KaleidoScopePipeline"
+kaleido_scope = "kaleido_scope:KaleidoScopePipeline"
 
 [build-system]
 requires = ["hatchling"]
