@@ -1,6 +1,6 @@
 import torch
 
-from .effects.scope_slicer import apply_slicer
+from .effects.slicer import apply_slicer
 from .schema import SlicerParams
 
 try:
@@ -12,7 +12,7 @@ except Exception:  # pragma: no cover
 
 
 class SlicerPipeline:
-    id = "scope_slicer"
+    id = "slicer"
     name = "Slicer"
     description = "Slicer effect with prompt-length driven slice count"
     usage = [getattr(UsageType, "PIPELINE", getattr(UsageType, "MAIN", "pipeline"))]
