@@ -71,8 +71,6 @@ class DateTypePipeline(Pipeline):
     def get_config_class(cls) -> type["BasePipelineConfig"]:
         return DateTypeConfig
 
-    def __init__(self, device: torch.device | None = None, **kwargs):
-
         # Typing state
         self._prev_text: str = ""
         self._prev_len: int = 0
