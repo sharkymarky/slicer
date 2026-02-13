@@ -72,11 +72,6 @@ class DateTypePipeline(Pipeline):
         return DateTypeConfig
 
     def __init__(self, device: torch.device | None = None, **kwargs):
-        self.device = (
-            device
-            if device is not None
-            else torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        )
 
         # Typing state
         self._prev_text: str = ""
@@ -131,8 +126,9 @@ class DateTypePipeline(Pipeline):
             raise ValueError("DateTypePipeline requires video input")
 
         # Stack frames -> (T, H, W, C), normalize to [0, 1]
-        frames = torch.stack([frame.squeeze(0) for frame in video], dim=0)
-        frames = frames.to(device=self.device, dtype=torch.float32) / 255.0
+        frames_u8 = torch.stack([frame.squeeze(0) for frame in video], dim=0)  # (T,H,W,C)
+        frames = frames_u8.to(dtype=torch.float32) / 255.0                     # stays on same device
+
 
         # Read prompt stream (read-only)
         prompts = kwargs.get("prompts", None)
