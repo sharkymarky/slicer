@@ -1,3 +1,55 @@
+from __future__ import annotations
+
+import datetime as _dt
+import hashlib
+import string
+import time
+from typing import TYPE_CHECKING, Any
+
+import torch
+from scope.core.pipelines.interface import Pipeline, Requirements
+
+from .effects import multi_exposure_plate, slit_scan_bands
+from .schema import DateTypeConfig, DateTypeMode, ScanOrientation
+
+if TYPE_CHECKING:
+    from scope.core.pipelines.base_schema import BasePipelineConfig
+
+
+def _extract_prompt_text(prompts: Any) -> str:
+    if prompts is None:
+        return ""
+    if isinstance(prompts, (list, tuple)):
+        parts: list[str] = []
+        for p in prompts:
+            if p is None:
+                continue
+            if isinstance(p, dict):
+                t = p.get("text") or p.get("prompt") or ""
+            else:
+                t = getattr(p, "text", None) or getattr(p, "prompt", None) or ""
+            t = str(t).strip()
+            if t:
+                parts.append(t)
+        return " | ".join(parts)
+    return str(prompts).strip()
+
+
+def _count_punct_and_space(s: str) -> tuple[int, int]:
+    punct = 0
+    spaces = 0
+    for ch in s:
+        if ch.isspace():
+            spaces += 1
+        elif ch in string.punctuation:
+            punct += 1
+    return punct, spaces
+
+
+def _safe_div(a: float, b: float) -> float:
+    return a / b if b != 0 else 0.0
+
+
 class DateTypePipeline(Pipeline):
     """DATE / TYPE — prompt-driven temporal photography pipeline."""
 
@@ -7,7 +59,6 @@ class DateTypePipeline(Pipeline):
 
     def __init__(self, **kwargs):
         # Scope passes load params like height/width here.
-        # Base Pipeline may or may not accept kwargs, so guard it.
         try:
             super().__init__(**kwargs)
         except TypeError:
@@ -77,9 +128,6 @@ class DateTypePipeline(Pipeline):
         self._prev_call_t = now
 
         char_len = len(text)
-        words = [w for w in text.strip().split() if w]
-        word_count = len(words)
-
         punct_count, space_count = _count_punct_and_space(text)
         structure_density = _safe_div(float(punct_count + space_count), float(max(1, char_len)))
 
@@ -150,11 +198,4 @@ class DateTypePipeline(Pipeline):
                 text_influence=text_influence,
                 date_influence=date_influence,
                 len_norm=len_norm,
-                cadence_norm=cadence_norm,
-                revision_norm=revision_norm,
-                pause_norm=pause_norm,
-                structure_norm=structure_norm,
-                date_params=date_params,
-            )
-
-        return {"video": out.clamp(0, 1)}
+                cadence_norm=cad
